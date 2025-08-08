@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Captcha - Slider and Free Drag Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .demo-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .demo-icon {
+            font-size: 24px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .info-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            color: #666;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .feature-icon {
+            color: #4CAF50;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .code-comment {
+            color: #6A9955;
+        }
+        
+        .code-string {
+            color: #CE9178;
+        }
+        
+        .code-keyword {
+            color: #569CD6;
+        }
+        
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Secure Captcha Demonstrations</h1>
+        
+        <div class="demo-grid">
+            <!-- Slider Version -->
+            <div class="demo-card">
+                <div class="demo-title">
+                    <span class="demo-icon">⇄</span>
+                    Slider Version
+                </div>
+                <div id="sliderCaptcha"></div>
+                <div id="sliderStatus" class="status-message"></div>
+            </div>
+            
+            <!-- Free Drag Version -->
+            <div class="demo-card">
+                <div class="demo-title">
+                    <span class="demo-icon">✋</span>
+                    Free Drag Version
+                </div>
+                <div id="freeDragCaptcha"></div>
+                <div id="dragStatus" class="status-message"></div>
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-title">
+                <span>🛡️</span>
+                Security Features
+            </div>
+            <ul class="feature-list">
+                <li>
+                    <span class="feature-icon">✓</span>
+                    <div>
+                        <strong>No Position Exposure:</strong> Target coordinates never sent to client - stored only in server session
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">✓</span>
+                    <div>
+                        <strong>Server-Side Rendering:</strong> Images generated dynamically using PHP GD library
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">✓</span>
+                    <div>
+                        <strong>Session-Based Validation:</strong> Each challenge tied to PHP session with expiration
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">✓</span>
+                    <div>
+                        <strong>Attempt Limiting:</strong> Maximum 5 attempts per challenge before reset
+                    </div>
+                </li>
+                <li>
+                    <span class="feature-icon">✓</span>
+                    <div>
+                        <strong>Automation Resistant:</strong> Without target position, bots cannot solve automatically
+                    </div>
+                </li>
+            </ul>
+            
+            <div class="code-block">
+                <span class="code-comment">// Traditional vulnerable approach exposes solution:</span><br>
+                {<br>
+                &nbsp;&nbsp;<span class="code-string">"challengeId"</span>: <span class="code-string">"abc123"</span>,<br>
+                &nbsp;&nbsp;<span class="code-string">"targetX"</span>: 142, <span class="code-comment">// ← VULNERABLE!</span><br>
+                }<br><br>
+                
+                <span class="code-comment">// Our secure approach only sends:</span><br>
+                {<br>
+                &nbsp;&nbsp;<span class="code-string">"challengeId"</span>: <span class="code-string">"xyz789"</span>,<br>
+                &nbsp;&nbsp;<span class="code-string">"imageWidth"</span>: 320,<br>
+                &nbsp;&nbsp;<span class="code-string">"imageHeight"</span>: 200,<br>
+                &nbsp;&nbsp;<span class="code-string">"pieceSize"</span>: 50<br>
+                &nbsp;&nbsp;<span class="code-comment">// No position data!</span><br>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <script src="/frontend/js/secure-slider-captcha.js"></script>
+    <script src="/frontend/js/secure-captcha.js"></script>
+    <script>
+        // Initialize slider version
+        const sliderCaptcha = new SecureSliderCaptcha('#sliderCaptcha', {
+            baseUrl: '/backend/php/secure-captcha.php',
+            onSuccess: function() {
+                const status = document.getElementById('sliderStatus');
+                status.textContent = '✅ Slider captcha solved successfully!';
+                status.className = 'status-message status-success';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            },
+            onFail: function() {
+                const status = document.getElementById('sliderStatus');
+                status.textContent = '❌ Incorrect position. Try again.';
+                status.className = 'status-message status-error';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 2000);
+            }
+        });
+        
+        // Initialize free drag version
+        const freeDragCaptcha = new SecureCaptcha('#freeDragCaptcha', {
+            baseUrl: '/backend/php/secure-captcha.php',
+            onSuccess: function() {
+                const status = document.getElementById('dragStatus');
+                status.textContent = '✅ Free drag captcha solved successfully!';
+                status.className = 'status-message status-success';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            },
+            onFail: function() {
+                const status = document.getElementById('dragStatus');
+                status.textContent = '❌ Incorrect position. Try again.';
+                status.className = 'status-message status-error';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
