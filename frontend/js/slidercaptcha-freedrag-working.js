@@ -83,7 +83,6 @@ class FreeDropSliderCaptcha {
 
     async requestChallenge() {
         try {
-            console.log('Requesting challenge...');
             
             const response = await fetch(this.options.challengeUrl, {
                 method: 'GET',
@@ -105,17 +104,12 @@ class FreeDropSliderCaptcha {
             // Random start position
             this.currentX = Math.floor(Math.random() * 100);
             this.currentY = Math.floor(Math.random() * (this.options.height - 60));
-            
-            console.log('Challenge:', {
-                id: this.challengeId,
-                target: { x: this.targetX, y: this.targetY },
-                start: { x: this.currentX, y: this.currentY }
-            });
+            // Challenge loaded
             
             this.loadImage();
             
         } catch (error) {
-            console.error('Challenge error:', error);
+            // Error:('Challenge error:', error);
             this.infoText.textContent = 'Failed to load captcha';
         }
     }
@@ -125,7 +119,6 @@ class FreeDropSliderCaptcha {
         img.crossOrigin = 'anonymous';
         
         img.onload = () => {
-            console.log('Image loaded');
             this.drawBackground(img);
             this.drawPuzzlePiece(img);
             this.positionPiece(this.currentX, this.currentY);
@@ -134,7 +127,6 @@ class FreeDropSliderCaptcha {
         };
         
         img.onerror = () => {
-            console.log('Image error, trying local');
             img.src = this.options.localImages();
         };
         
@@ -230,7 +222,6 @@ class FreeDropSliderCaptcha {
     }
 
     setupDragEvents() {
-        console.log('Setting up drag events');
         
         // Remove any existing listeners
         this.puzzlePiece.onmousedown = null;
@@ -261,7 +252,6 @@ class FreeDropSliderCaptcha {
         this.offsetY = clientY - rect.top;
         
         this.puzzlePiece.style.cursor = 'grabbing';
-        console.log('Drag started');
     }
 
     drag(e) {
@@ -299,7 +289,6 @@ class FreeDropSliderCaptcha {
         this.isDragging = false;
         
         this.puzzlePiece.style.cursor = 'move';
-        console.log('Drag ended at:', this.currentX, this.currentY);
         
         // Check if close to target
         // The correct position for the puzzle piece canvas is targetY - 10
@@ -325,7 +314,6 @@ class FreeDropSliderCaptcha {
                 mode: 'free'
             };
             
-            console.log('Verifying...', data);
             
             const response = await fetch(this.options.verifyUrl, {
                 method: 'POST',
@@ -335,7 +323,6 @@ class FreeDropSliderCaptcha {
             });
             
             const result = await response.json();
-            console.log('Result:', result);
             
             if (result.verified) {
                 this.infoText.textContent = '✅ Success!';
@@ -352,7 +339,7 @@ class FreeDropSliderCaptcha {
                 setTimeout(() => this.reset(), 1500);
             }
         } catch (error) {
-            console.error('Verify error:', error);
+            // Error:('Verify error:', error);
         }
     }
 

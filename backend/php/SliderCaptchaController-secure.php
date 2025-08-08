@@ -14,7 +14,7 @@ class SecureSliderCaptchaController {
     
     public function __construct() {
         if (!is_dir($this->sessionPath)) {
-            mkdir($this->sessionPath, 0777, true);
+            mkdir($this->sessionPath, 0700, true); // Secure permissions
         }
     }
     
@@ -25,6 +25,33 @@ class SecureSliderCaptchaController {
     public function generateChallenge() {
         $this->setCorsHeaders();
         
+        // IP-based rate limiting
+        $ip = $this->getClientIp();
+        $rateLimitFile = $this->sessionPath . '/ratelimit_' . md5($ip) . '.json';
+        
+        if (file_exists($rateLimitFile)) {
+            $rateData = json_decode(file_get_contents($rateLimitFile), true);
+            $now = time();
+            
+            // Reset counter if window expired (1 minute)
+            if ($now - $rateData['window_start'] > 60) {
+                $rateData = ['count' => 0, 'window_start' => $now];
+            }
+            
+            // Check rate limit (max 10 challenges per minute)
+            if ($rateData['count'] >= 10) {
+                return $this->jsonResponse([
+                    'error' => 'Rate limit exceeded. Please try again later.'
+                ], 429);
+            }
+            
+            $rateData['count']++;
+        } else {
+            $rateData = ['count' => 1, 'window_start' => time()];
+        }
+        
+        file_put_contents($rateLimitFile, json_encode($rateData));
+        
         // Generate unique challenge ID
         $challengeId = bin2hex(random_bytes(32));
         
@@ -33,7 +60,7 @@ class SecureSliderCaptchaController {
         // Assuming default width=320, L≈60
         $minX = 70;
         $maxX = 250;
-        $targetX = rand($minX, $maxX);
+        $targetX = random_int($minX, $maxX); // Cryptographically secure random
         
         // Calculate slider position needed (matching JS formula)
         $sliderL = 42;
@@ -63,9 +90,12 @@ class SecureSliderCaptchaController {
             'session_id' => session_id()
         ]);
         
+        // SECURITY WARNING: Sending targetX exposes the solution!
+        // This is a known vulnerability but required for current implementation
+        // TODO: Implement server-side image generation to avoid this
         return $this->jsonResponse([
             'challengeId' => $challengeId,
-            'targetX' => $targetX, // Send position to client for rendering
+            'targetX' => $targetX, // VULNERABILITY: Exposes solution to client
             'timestamp' => time()
         ]);
     }
@@ -91,8 +121,22 @@ class SecureSliderCaptchaController {
             ], 400);
         }
         
-        $challengeId = $input['challengeId'];
+        // Input validation and sanitization
+        $challengeId = preg_replace('/[^a-f0-9]/i', '', $input['challengeId']);
+        if (strlen($challengeId) !== 64) { // 32 bytes in hex
+            return $this->jsonResponse([
+                'verified' => false,
+                'error' => 'Invalid challenge ID format'
+            ], 400);
+        }
+        
         $trail = $input['trail'];
+        if (!is_array($trail) || count($trail) < 2 || count($trail) > 1000) {
+            return $this->jsonResponse([
+                'verified' => false,
+                'error' => 'Invalid trail data'
+            ], 400);
+        }
         
         // Load challenge data
         $challengeData = $this->loadChallengeData($challengeId);
@@ -360,7 +404,14 @@ class SecureSliderCaptchaController {
      * Set CORS headers
      */
     private function setCorsHeaders() {
-        header("Access-Control-Allow-Origin: *");
+        // TODO: Replace with your actual domain
+        $allowedOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+        $allowedOrigins = ['http://localhost:8000', 'http://localhost:8080']; // Add your domains
+        if (in_array($allowedOrigin, $allowedOrigins)) {
+            header("Access-Control-Allow-Origin: $allowedOrigin");
+        } else {
+            header("Access-Control-Allow-Origin: http://localhost:8000"); // Default safe origin
+        }
         header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
         header("Access-Control-Allow-Headers: Content-Type");
         

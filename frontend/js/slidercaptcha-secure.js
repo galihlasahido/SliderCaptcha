@@ -88,7 +88,7 @@ class SecureSliderCaptcha {
 
     async requestChallenge() {
         try {
-            console.log('Requesting new challenge from server...');
+            // Request challenge from server
             
             const response = await fetch(this.options.challengeUrl, {
                 method: 'GET',
@@ -109,18 +109,13 @@ class SecureSliderCaptcha {
             const maxSliderMove = this.options.width - 40;
             const puzzleRange = this.options.width - this.L;
             this.targetSliderX = (this.targetX / puzzleRange) * maxSliderMove;
-            
-            console.log('Challenge received:', {
-                challengeId: this.challengeId,
-                targetX: this.targetX,
-                targetSliderX: this.targetSliderX
-            });
+            // Challenge data loaded
             
             // Now load the image with the server-determined position
             this.loadImage();
             
         } catch (error) {
-            console.error('Failed to get challenge:', error);
+            // Error:('Failed to get challenge:', error);
             this.sliderText.textContent = 'Failed to load captcha';
             this.sliderContainer.classList.add('sc-error');
         }
@@ -136,11 +131,7 @@ class SecureSliderCaptcha {
                 10 + this.options.sliderR * 2, 
                 this.options.height - this.L - 10
             );
-            
-            console.log('Drawing puzzle at server position:', {
-                targetX: this.targetX,
-                puzzleY: this.puzzleY
-            });
+            // Position determined
             
             this.drawPuzzle(img);
             this.sliderText.textContent = this.options.barText;
@@ -294,22 +285,8 @@ class SecureSliderCaptcha {
             const sliderLeft = parseFloat(this.slider.style.left) || 0;
             const blockLeft = parseFloat(this.block.style.left) || 0;
             
-            // Local validation first
-            const sliderDistance = Math.abs(sliderLeft - this.targetSliderX);
-            const blockDistance = Math.abs(blockLeft - this.targetX);
-            const locallyCorrect = sliderDistance <= this.options.offset || blockDistance <= this.options.offset;
-            
-            console.log('Local validation:', {
-                sliderPos: sliderLeft.toFixed(1),
-                targetSliderPos: this.targetSliderX.toFixed(1),
-                locallyCorrect: locallyCorrect
-            });
-            
-            if (!locallyCorrect) {
-                // Don't even send to server if obviously wrong
-                this.handleFailure();
-                return;
-            }
+            // SECURITY: No client-side validation - let server decide
+            // This prevents information leakage about correct position
             
             // Server verification with challenge ID
             try {
@@ -317,11 +294,7 @@ class SecureSliderCaptcha {
                     challengeId: this.challengeId,
                     trail: this.trail
                 };
-                
-                console.log('Sending to secure server:', {
-                    challengeId: this.challengeId,
-                    trailPoints: this.trail.length
-                });
+                // Sending verification request
                 
                 const response = await fetch(this.options.verifyUrl, {
                     method: 'POST',
@@ -331,7 +304,6 @@ class SecureSliderCaptcha {
                 });
                 
                 const result = await response.json();
-                console.log('Server response:', result);
                 
                 if (result.verified) {
                     this.handleSuccess();
@@ -346,7 +318,7 @@ class SecureSliderCaptcha {
                     }
                 }
             } catch (error) {
-                console.error('Verification error:', error);
+                // Error:('Verification error:', error);
                 this.handleFailure();
             }
         };
