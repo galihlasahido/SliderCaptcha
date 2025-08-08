@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Web.config example for .NET 4.5 Slider Captcha
+  Add this handler configuration to your web.config
+-->
+<configuration>
+  <system.web>
+    <httpHandlers>
+      <!-- Register the SliderCaptcha handler -->
+      <add verb="*" path="SliderCaptcha.ashx" 
+           type="SliderCaptcha.SliderCaptchaHandler, YourAssemblyName" />
+    </httpHandlers>
+    
+    <!-- Enable session state -->
+    <sessionState mode="InProc" 
+                  cookieless="false" 
+                  timeout="20" />
+  </system.web>
+  
+  <!-- For IIS 7+ -->
+  <system.webServer>
+    <handlers>
+      <add name="SliderCaptcha" 
+           verb="*" 
+           path="SliderCaptcha.ashx" 
+           type="SliderCaptcha.SliderCaptchaHandler, YourAssemblyName" />
+    </handlers>
+    
+    <!-- Enable CORS if needed -->
+    <httpProtocol>
+      <customHeaders>
+        <add name="Access-Control-Allow-Origin" value="*" />
+        <add name="Access-Control-Allow-Methods" value="GET, POST, OPTIONS" />
+        <add name="Access-Control-Allow-Headers" value="Content-Type" />
+      </customHeaders>
+    </httpProtocol>
+  </system.webServer>
+</configuration>

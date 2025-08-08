@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Captcha - Final Version</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="disk/slidercaptcha-improved.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .badge {
+            display: inline-block;
+            background: #52ccba;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        #captcha {
+            margin: 30px auto;
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            display: none;
+            animation: slideIn 0.4s ease;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+        
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .status.info {
+            background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+        
+        .debug-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .debug-panel.show {
+            display: block;
+        }
+        
+        .debug-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .debug-info {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .debug-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .debug-label {
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .debug-value {
+            color: #333;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-weight: 600;
+        }
+        
+        .features {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+        }
+        
+        .features h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .feature-icon {
+            color: #52ccba;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 480px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧩 Slider Captcha <span class="badge">FINAL</span></h1>
+        <p class="subtitle">Random positioning • Accurate verification</p>
+        
+        <div id="captcha"></div>
+        
+        <div id="status" class="status"></div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="resetCaptcha()">
+                <i class="fa fa-redo"></i> New Puzzle
+            </button>
+            <button class="btn btn-secondary" onclick="toggleDebug()">
+                <i class="fa fa-bug"></i> Debug Mode
+            </button>
+            <button class="btn btn-info" onclick="showHint()">
+                <i class="fa fa-lightbulb"></i> Hint
+            </button>
+        </div>
+        
+        <div id="debugPanel" class="debug-panel">
+            <div class="debug-title">
+                <i class="fa fa-cog"></i> Debug Information
+            </div>
+            <div class="debug-info">
+                <div class="debug-item">
+                    <span class="debug-label">Puzzle Target X:</span>
+                    <span class="debug-value" id="targetX">-</span>
+                </div>
+                <div class="debug-item">
+                    <span class="debug-label">Current Block X:</span>
+                    <span class="debug-value" id="currentX">0</span>
+                </div>
+                <div class="debug-item">
+                    <span class="debug-label">Distance to Target:</span>
+                    <span class="debug-value" id="distance">-</span>
+                </div>
+                <div class="debug-item">
+                    <span class="debug-label">Tolerance:</span>
+                    <span class="debug-value" id="tolerance">5px</span>
+                </div>
+                <div class="debug-item">
+                    <span class="debug-label">Status:</span>
+                    <span class="debug-value" id="debugStatus">Ready</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h3><i class="fa fa-star"></i> Key Features</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fa fa-random feature-icon"></i>
+                    <span>Random puzzle positions</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa fa-check-circle feature-icon"></i>
+                    <span>Accurate verification</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa fa-hand-pointer feature-icon"></i>
+                    <span>Touch & mouse support</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa fa-shield-alt feature-icon"></i>
+                    <span>Bot detection</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa fa-server feature-icon"></i>
+                    <span>Server validation ready</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fa fa-mobile-alt feature-icon"></i>
+                    <span>Mobile responsive</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="disk/slidercaptcha-working.js"></script>
+    <script>
+        let captcha;
+        let debugMode = false;
+        
+        function initCaptcha() {
+            captcha = new SliderCaptcha('#captcha', {
+                width: 320,
+                height: 160,
+                offset: 5,
+                onSuccess: function() {
+                    showStatus('🎉 Excellent! Puzzle completed successfully!', 'success');
+                    updateDebug('debugStatus', 'SUCCESS ✓', '#28a745');
+                    
+                    setTimeout(() => {
+                        this.reset();
+                        hideStatus();
+                        updateDebugAfterReset();
+                    }, 3000);
+                },
+                onFail: function() {
+                    showStatus('❌ Not quite right. Try sliding to match the puzzle gap.', 'error');
+                    updateDebug('debugStatus', 'FAILED ✗', '#dc3545');
+                    
+                    setTimeout(() => {
+                        hideStatus();
+                        updateDebug('debugStatus', 'Ready');
+                    }, 2000);
+                },
+                onRefresh: function() {
+                    showStatus('🔄 New puzzle generated', 'info');
+                    updateDebugAfterReset();
+                    setTimeout(hideStatus, 1500);
+                }
+            });
+            
+            // Monitor slider movement for debug
+            if (debugMode) {
+                setupDebugMonitoring();
+            }
+        }
+        
+        function setupDebugMonitoring() {
+            window.debugMode = true; // Enable console logging in the captcha
+            
+            const slider = document.querySelector('.sc-slider');
+            const block = document.querySelector('.sc-block');
+            
+            if (slider && block) {
+                // Create a mutation observer to watch for style changes
+                const observer = new MutationObserver(() => {
+                    const sliderLeft = parseFloat(slider.style.left) || 0;
+                    const blockLeft = parseFloat(block.style.left) || 0;
+                    
+                    updateDebug('currentX', blockLeft.toFixed(1) + 'px');
+                    
+                    if (captcha && captcha.targetX) {
+                        const targetBlockX = captcha.targetX - 3;
+                        const distance = Math.abs(blockLeft - targetBlockX);
+                        updateDebug('distance', distance.toFixed(1) + 'px');
+                        
+                        // Also show slider position vs target
+                        const sliderInfo = document.getElementById('debugStatus');
+                        if (sliderInfo && captcha.targetSliderX) {
+                            const sliderDist = Math.abs(sliderLeft - captcha.targetSliderX);
+                            sliderInfo.innerHTML = `Slider: ${sliderLeft.toFixed(0)}/${captcha.targetSliderX.toFixed(0)}px (${sliderDist.toFixed(0)}px off)`;
+                        }
+                        
+                        if (distance <= 5) {
+                            updateDebug('distance', distance.toFixed(1) + 'px', '#28a745');
+                        } else if (distance <= 10) {
+                            updateDebug('distance', distance.toFixed(1) + 'px', '#ffc107');
+                        } else {
+                            updateDebug('distance', distance.toFixed(1) + 'px', '#dc3545');
+                        }
+                    }
+                });
+                
+                observer.observe(block, { attributes: true, attributeFilter: ['style'] });
+                observer.observe(slider, { attributes: true, attributeFilter: ['style'] });
+            }
+        }
+        
+        function updateDebugAfterReset() {
+            if (captcha && captcha.targetX) {
+                updateDebug('targetX', (captcha.targetX - 3).toFixed(1) + 'px');
+            }
+            updateDebug('currentX', '0px');
+            updateDebug('distance', '-');
+            updateDebug('debugStatus', 'Ready');
+        }
+        
+        function resetCaptcha() {
+            captcha.reset();
+            showStatus('🔄 New puzzle loaded', 'info');
+            updateDebugAfterReset();
+            setTimeout(hideStatus, 1500);
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('show');
+            
+            if (debugMode) {
+                setupDebugMonitoring();
+                updateDebugAfterReset();
+                showStatus('🐛 Debug mode enabled', 'info');
+            } else {
+                showStatus('Debug mode disabled', 'info');
+            }
+            
+            setTimeout(hideStatus, 1500);
+        }
+        
+        function showHint() {
+            showStatus('💡 Drag the slider to move the puzzle piece into the matching gap', 'info');
+            setTimeout(hideStatus, 3000);
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.innerHTML = message;
+            status.className = 'status show ' + type;
+        }
+        
+        function hideStatus() {
+            const status = document.getElementById('status');
+            status.className = 'status';
+        }
+        
+        function updateDebug(id, value, color = '#333') {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+                element.style.color = color;
+            }
+        }
+        
+        // Initialize on load
+        initCaptcha();
+        
+        // Show welcome message
+        setTimeout(() => {
+            showStatus('👋 Welcome! Drag the slider to complete the puzzle', 'info');
+            setTimeout(hideStatus, 4000);
+        }, 500);
+    </script>
+</body>
+</html>

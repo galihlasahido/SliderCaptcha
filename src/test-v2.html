@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slider Captcha V2 - Fixed Verification</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="disk/slidercaptcha-improved.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding: 50px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .version {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .status {
+            margin-top: 25px;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .features {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .features h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .features ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .features li {
+            padding: 8px 0;
+            color: #555;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .features li::before {
+            content: '✓';
+            color: #52ccba;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .debug-info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧩 Slider Captcha</h1>
+        <p class="version">Version 2.0 - Fixed Verification Logic</p>
+        
+        <div id="captcha"></div>
+        
+        <div id="status" class="status"></div>
+        
+        <div id="debug" class="debug-info" style="display: none;">
+            <strong>Debug Info:</strong><br>
+            <span id="debugText"></span>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="resetCaptcha()">
+                <i class="fa fa-redo"></i> Reset
+            </button>
+            <button class="btn btn-secondary" onclick="toggleDebug()">
+                <i class="fa fa-bug"></i> Debug
+            </button>
+        </div>
+        
+        <div class="features">
+            <h3>✨ What's Fixed</h3>
+            <ul>
+                <li>Accurate position verification</li>
+                <li>Proper block-to-puzzle alignment</li>
+                <li>Simplified verification logic</li>
+                <li>Better tolerance for slight misalignment</li>
+                <li>Debug mode for troubleshooting</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="disk/slidercaptcha-v2.js"></script>
+    <script>
+        let debugMode = false;
+        
+        const captcha = new SliderCaptcha('#captcha', {
+            width: 320,
+            height: 160,
+            offset: 10, // Increased tolerance
+            onSuccess: function() {
+                showStatus('🎉 Perfect! Captcha solved successfully!', 'success');
+                
+                if (debugMode) {
+                    document.getElementById('debugText').innerHTML = 
+                        `SUCCESS - Puzzle completed at correct position`;
+                }
+                
+                setTimeout(() => {
+                    this.reset();
+                    hideStatus();
+                }, 3000);
+            },
+            onFail: function() {
+                showStatus('❌ Not quite right. Please try again!', 'error');
+                
+                if (debugMode) {
+                    document.getElementById('debugText').innerHTML = 
+                        `FAILED - Puzzle not in correct position`;
+                }
+                
+                setTimeout(hideStatus, 2000);
+            },
+            onRefresh: function() {
+                showStatus('🔄 Puzzle refreshed', 'info');
+                setTimeout(hideStatus, 1000);
+                
+                if (debugMode) {
+                    document.getElementById('debugText').innerHTML = 
+                        `Puzzle reset - New position generated`;
+                }
+            }
+        });
+        
+        function resetCaptcha() {
+            captcha.reset();
+            showStatus('🔄 Captcha reset', 'info');
+            setTimeout(hideStatus, 1000);
+        }
+        
+        function toggleDebug() {
+            debugMode = !debugMode;
+            const debugDiv = document.getElementById('debug');
+            debugDiv.style.display = debugMode ? 'block' : 'none';
+            
+            if (debugMode) {
+                document.getElementById('debugText').innerHTML = 
+                    `Debug mode enabled - Drag slider to see position info`;
+            }
+        }
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status show ' + type;
+        }
+        
+        function hideStatus() {
+            const status = document.getElementById('status');
+            status.className = 'status';
+        }
+        
+        // Show welcome message
+        setTimeout(() => {
+            showStatus('👆 Drag the slider to complete the puzzle', 'info');
+            setTimeout(hideStatus, 3000);
+        }, 500);
+    </script>
+</body>
+</html>

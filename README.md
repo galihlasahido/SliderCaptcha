@@ -1,238 +1,212 @@
-﻿## Slider Captcha
+# 🔐 Secure Slider Captcha
 
-<span>English</span> | <a href="README.zh-CN.md">中文</a>
+A **secure, challenge-response based** slider captcha implementation with **anti-replay protection** and **server-side validation**.
 
----
+## 🛡️ Security Features
 
-The user completes the verification by dragging the slider to support the PC and mobile terminals. The time, accuracy and sliding trajectory information of user dragging behavior can be sent to the server, and then the background algorithm verification can be carried out.
+- ✅ **One-time challenge tokens** - Each challenge can only be used once
+- ✅ **Server-side puzzle position validation** - Position stored and validated on server
+- ✅ **Anti-replay protection** - Prevents reuse of valid requests
+- ✅ **Challenge expiration** - 5-minute timeout for challenges
+- ✅ **Rate limiting** - Maximum 5 attempts per challenge
+- ✅ **Bot detection** - Analyzes movement patterns and velocity
+- ✅ **Session-based verification** - Secure token generation
 
-## Blazor Version
+## 📁 Project Structure
 
-http://blazor.sdgxgz.com/captchas
+```
+SliderCaptcha/
+├── backend/
+│   ├── php/
+│   │   └── SliderCaptchaController-secure.php  # PHP implementation
+│   ├── dotnet/
+│   │   ├── SliderCaptchaController.NET45.cs    # .NET 4.5 implementation
+│   │   ├── SliderCaptchaController.NET48.cs    # .NET 4.8 implementation
+│   │   └── Web.config.example                  # IIS configuration
+│   └── java/
+│       ├── SliderCaptchaController.java        # Spring Boot implementation
+│       ├── pom.xml                             # Maven dependencies
+│       └── application.properties              # Spring configuration
+├── frontend/
+│   ├── js/
+│   │   └── slidercaptcha-secure.js             # Secure JavaScript client
+│   ├── css/
+│   │   └── slidercaptcha-improved.css          # Styles
+│   └── images/
+│       └── Pic0.jpg - Pic4.jpg                 # Sample images
+├── demos/
+│   └── index.php                               # Live demo
+└── README.md
+```
 
-## Online Demonstration
-Single page presentation: http://longbowenterprise.gitee.io/slidercaptcha/  
-In-Project Demonstration: https://admin.blazor.zone/ (Open source Admin Control Pannel [[BootstrapAdmin](https://github.com/ArgoZhang/BootstrapAdmin)])  
-**Slide captcha appears for the fourth time after three times of incorrect password input**  
+## 🚀 Quick Start
 
-## Screenshot
-![输入图片说明](https://images.gitee.com/uploads/images/2019/0316/003740_c5175e6b_554725.png "SliderCaptcha.png")
-![输入图片说明](https://gitee.com/uploads/images/2019/0410/124955_f9b6d54c_554725.png "Untitled.png")
+### Run the Demo
 
-## Quick Start
+```bash
+# Method 1: Using the provided script
+./run-demo.sh
 
-### Dependencies 
-font-awesome
+# Method 2: Direct PHP command
+php -S localhost:8000
 
-### CSS
+# Then open in browser:
+# http://localhost:8000/demos/
+```
 
+### PHP Implementation
+
+1. **Setup:**
+```bash
+# Copy files to your web server
+cp backend/php/SliderCaptchaController-secure.php /var/www/your-app/
+cp -r frontend/* /var/www/your-app/assets/
+```
+
+2. **Include in your HTML:**
 ```html
-<link href="https://cdn.bootcss.com/font-awesome/5.7.2/css/all.min.css">
-<link href="./src/slidercaptcha.css">
-```
-Copy-paste the stylesheet `<link>` into your `<head>` before all other stylesheets to load our CSS.
-
-### JS
-
-```html
-<script src="./src/longbow.slidercaptcha.js"></script>
+<link rel="stylesheet" href="assets/css/slidercaptcha-improved.css">
+<script src="assets/js/slidercaptcha-secure.js"></script>
 ```
 
-Place the following `<script>`s near the end of your pages, right before the closing `</body>` tag, to enable them. 
-
-## Usage
-
-```html
-<div id="captcha"></div>
-```
-
-## API
-
-### JavaScript behavior
-
-```html
-<div id="captcha"></div>
-<script>
-    sliderCaptcha({
-        id: 'captcha'
-    });
-</script>   
-```
-
-### Options
-
-```html
-<div id="captcha"></div>
-<script>
-    sliderCaptcha({
-        id: 'captcha',
-        width: 280,
-        height: 150,
-        sliderL: 42,
-        sliderR: 9,
-        offset: 5,
-        loadingText: 'Loading...',
-        failedText: 'Try again',
-        barText: 'Slide right to fill',
-        repeatIcon: 'fa fa-redo',
-        setSrc: function () {
-            
-        },
-        onSuccess: function () {
-            
-        },
-        onFail: function () {
-
-        },
-        onRefresh: function () {
-        
-        }
-    });
-</script>   
-```
-
-Name | Type | Default | Description |
----|---|---|---
-width | integer | 280 | Background picture width
-height | integer | 150 | Background picture height
-sliderL | integer | 42 | Puzzle Width
-sliderR | integer | 9 | Puzzle Outburst Radius
-offset | integer | 5 | Validation of error tolerance deviation. default 5px
-loadingText | string | "Loading..." | Text information displayed when images are loaded
-failedText | string | "Try again" | Text information displayed when validation fails
-barText | integer | "Slide right to fill" | Text information displayed when dragging the slider to prepare for dragging
-repeatIcon | string | "fa fa-redo" | Reload icons. dependent on `font-awesome`
-setSrc | function | "https://picsum.photos/?image=random" | Setting the Picture Loading Path
-onSuccess | function | *null* | Callback this function when validation passes
-onFail | function | *null* | Callback this function when validation fails
-onRefresh | function | *null* | Callback this function when click on the reload icon
-localImages | function | function () { return 'images/Pic' + Math.round(Math.random() * 4) + '.jpg'; } | Call this function when the image loading fails
-
-### Methods
-
-```html
-<div id="captcha"></div>
-<script>
-    var captcha = sliderCaptcha({
-        id: 'captcha'
-    });
-    captcha.reset();
-</script>   
-```
-
-Method | Example | Description
----|---|---
-reset | captcha.reset() | reset
-
-## Events
-
-None
-
-## Issue
-Please go to [Issue](../../issues) page to create issue
-
-## Verify On Server Side
-### Client Code Example
-#### 1. JavaScript
-```js
-verify: function (arr, url) {
-    var ret = false;
-    $.ajax({
-        url: url,
-        data: JSON.stringify(arr),
-        async: false,
-        cache: false,
-        type: 'POST',
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function (result) {
-            ret = result;
-        }
-    });
-    return ret;
-}
-```
-
-Parameter | Type | Default | Descript |
----|---|---|---
-arr | array | object | trails of user dragging slider  | 
-url | string | remoteUrl | option.remoteUrl |
-
-sample code
-```js
-sliderCaptcha({
-    id: 'captcha',
-    repeatIcon: 'fa fa-redo',
-    setSrc: function () {
-        return 'https://imgs.blazor.zone/images/Pic' + Math.round(Math.random() * 136) + '.jpg';
-    },
-    onSuccess: function () {
-        window.location.href = 'https://gitee.com/LongbowEnterprise/SliderCaptcha';
-    },
-    remoteUrl: "api/Captcha"
+3. **Initialize:**
+```javascript
+const captcha = new SecureSliderCaptcha('#captcha', {
+    challengeUrl: 'SliderCaptchaController-secure.php?action=challenge',
+    verifyUrl: 'SliderCaptchaController-secure.php?action=verify',
+    onSuccess: function() {
+        console.log('Verified!');
+    }
 });
 ```
 
-### Server Code Example
-#### 1. NETCore WebApi
-```csharp
-/// <summary>
-/// slider verify web api
-/// </summary>
-[Route("api/[controller]")]
-[ApiController]
-[AllowAnonymous]
-public class CaptchaController : ControllerBase
+### .NET Implementation
+
+1. **For .NET 4.5:** Use `SliderCaptchaController.NET45.cs` as HttpHandler
+2. **For .NET 4.8:** Use `SliderCaptchaController.NET48.cs` as Web API Controller
+
+Configure in `Web.config`:
+```xml
+<system.web>
+  <httpHandlers>
+    <add verb="*" path="SliderCaptcha.ashx" 
+         type="SliderCaptcha.SliderCaptchaHandler, YourAssembly" />
+  </httpHandlers>
+</system.web>
+```
+
+### Java Spring Boot Implementation
+
+1. **Add to your Spring Boot project:**
+```bash
+cp backend/java/SliderCaptchaController.java src/main/java/com/example/
+```
+
+2. **Add dependencies to `pom.xml`**
+
+3. **Configure in `application.properties`:**
+```properties
+captcha.storage.path=/tmp/captcha_sessions/
+captcha.challenge.expiry.minutes=5
+```
+
+## 🔒 How It Works
+
+1. **Client requests challenge** → Server generates unique `challengeId` with random puzzle position
+2. **Server stores challenge** → Position and metadata saved server-side
+3. **Client renders puzzle** → Using server-provided position
+4. **User solves puzzle** → Client sends `challengeId` + movement trail
+5. **Server validates** → Checks position, movement patterns, and marks challenge as used
+6. **One-time use** → Challenge is deleted after successful verification
+
+## 🧪 Testing Security
+
+The demo includes attack simulation buttons:
+
+- **Replay Attack Test** - Captures and replays a valid request
+- **Fake Trail Test** - Sends fabricated movement data
+- **Challenge Reuse Test** - Attempts to reuse a consumed challenge
+
+All attacks should fail with appropriate error messages.
+
+## 📊 API Endpoints
+
+### Generate Challenge
+```
+GET /api/slidercaptcha/challenge
+
+Response:
 {
-    /// <summary>
-    /// 服务器端滑块验证方法
-    /// </summary>
-    /// <returns></returns>
-    [HttpPost]
-    public bool Post([FromBody]List<int> datas)
-    {
-        var sum = datas.Sum();
-        var avg = sum * 1.0 / datas.Count;
-        var stddev = datas.Select(v => Math.Pow(v - avg, 2)).Sum() / datas.Count;
-        return stddev != 0;
-    }
+    "challengeId": "abc123...",
+    "targetX": 150,
+    "timestamp": 1234567890
 }
 ```
 
-#### 2. JAVA SpringBoot
-You may have precision problems, but you can use BigDecimal optimization
-```java
-@RestController
-@RequestMapping("/sliderCaptcha")
-public class SliderCaptchaController {
+### Verify Solution
+```
+POST /api/slidercaptcha/verify
 
-	@PostMapping("/isVerify")
-	public boolean isVerify(List<Integer> datas) {
-		int sum = 0;
-		for (Integer data : datas) {
-			sum += data;
-		}
-		double avg = sum * 1.0 / datas.size();
-		
-		double sum2 = 0.0;
-		for (Integer data : datas) {
-			sum2 += Math.pow(data - avg, 2);
-		}
-		
-		double stddev = sum2 / datas.size();
-		return stddev != 0;
-	}
-	
+Body:
+{
+    "challengeId": "abc123...",
+    "trail": [
+        {"x": 0, "y": 0, "t": 0},
+        {"x": 10, "y": 1, "t": 100},
+        ...
+    ]
+}
+
+Response:
+{
+    "verified": true,
+    "token": "success_token_xyz"
 }
 ```
 
-## Q&A
+## 🔧 Configuration
 
-[linked issue](https://gitee.com/LongbowEnterprise/SliderCaptcha/issues/I110MF?from=project-issue)  
+### PHP
+- Session storage path: `/tmp/captcha_sessions/`
+- Challenge expiry: 5 minutes
+- Max attempts: 5
+- Position tolerance: 10px
 
-## Contribution
+### .NET
+- Storage: In-memory with file fallback
+- Session timeout: 20 minutes
+- CORS: Configurable in Web.config
 
-1. Fork this project
-2. Create new Feat_xxx branch
-3. Commit 
-4. Create Pull Request
+### Java
+- Storage: ConcurrentHashMap with file persistence
+- Scheduled cleanup: Every minute
+- Optional Redis support
+
+## 📝 Requirements
+
+- **PHP**: 7.4+ with session support
+- **.NET**: Framework 4.5+ or 4.8+
+- **Java**: JDK 11+, Spring Boot 2.7+
+- **Browser**: Modern browser with Canvas API support
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Ensure all security measures are maintained
+4. Submit a pull request
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+## ⚠️ Security Note
+
+This implementation is designed to prevent:
+- Replay attacks
+- Automated bot submissions
+- Challenge reuse
+- Brute force attempts
+- Session hijacking
+
+Always use HTTPS in production and configure appropriate CORS policies.
