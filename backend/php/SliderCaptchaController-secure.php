@@ -186,7 +186,16 @@ class SecureSliderCaptchaController {
             return false;
         }
         
-        // Get expected positions
+        // Check if this is free drag mode from input data
+        $input = json_decode(file_get_contents('php://input'), true);
+        $mode = $input['mode'] ?? 'slider';
+        error_log("Validation mode: $mode");
+        
+        if ($mode === 'free') {
+            return $this->validateFreeDragSolution($trail, $challengeData);
+        }
+        
+        // Original slider validation
         $expectedSliderX = $challengeData['targetSliderX'];
         $tolerance = 10; // Allow 10px tolerance
         
@@ -223,6 +232,57 @@ class SecureSliderCaptchaController {
         $yRange = max($yValues) - min($yValues);
         if ($yRange < 1) {
             error_log("No Y-axis movement detected (bot-like)");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Validate free drag solution where puzzle can move in X and Y
+     */
+    private function validateFreeDragSolution($trail, $challengeData) {
+        // Get expected position
+        $targetX = $challengeData['targetX'];
+        $tolerance = 10; // Allow 10px tolerance
+        
+        // Get final position from trail
+        $finalPoint = end($trail);
+        $finalX = $finalPoint['x'] ?? 0;
+        $finalY = $finalPoint['y'] ?? 0;
+        
+        error_log("Free drag check - Target X: $targetX, Final X: $finalX");
+        
+        // Check if puzzle reached the target X position
+        if (abs($finalX - $targetX) > $tolerance) {
+            error_log("X position mismatch in free drag mode");
+            return false;
+        }
+        
+        // Check for movement (not just placed directly)
+        if (count($trail) < 5) {
+            error_log("Too few trail points for free drag");
+            return false;
+        }
+        
+        // Check duration
+        $duration = $finalPoint['t'] ?? 0;
+        if ($duration < 200) { // Slightly longer for free drag
+            error_log("Free drag too fast: {$duration}ms");
+            return false;
+        }
+        
+        // Calculate total distance traveled
+        $totalDistance = 0;
+        for ($i = 1; $i < count($trail); $i++) {
+            $dx = ($trail[$i]['x'] ?? 0) - ($trail[$i-1]['x'] ?? 0);
+            $dy = ($trail[$i]['y'] ?? 0) - ($trail[$i-1]['y'] ?? 0);
+            $totalDistance += sqrt($dx * $dx + $dy * $dy);
+        }
+        
+        // Check if there was actual dragging movement
+        if ($totalDistance < 20) {
+            error_log("Insufficient drag distance: $totalDistance");
             return false;
         }
         
